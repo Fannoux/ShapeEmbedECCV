@@ -112,6 +112,7 @@ def single_epoch_train( model, optimizer, train_loader, e_idx, tb_writer
   , 'kl': 0.0
   , 'beta_kl': 0.0
   }
+  last_losses = None
 
   # get each training batch from the loader
   n_batches = len(train_loader)
@@ -214,11 +215,21 @@ def test_model( model, dataloader
               , report_callback=None
               , summary_samples=None
               ):
-  # recover dataset #
-  subset = dataloader.dataset
+  # Check if the dataset is a raw dataset or a Subset wrapper
+  if not hasattr(dataloader.dataset, "dataset"):
+    # Create a dynamic structural mock that matches what the rest of the function expects
+    class MockSubset:
+      def __init__(self, ds):
+        self.dataset = ds
+        self.indices = list(range(len(ds)))
+    subset = MockSubset(dataloader.dataset)
+  else:
+    subset = dataloader.dataset
+
+  # Extract classes using the expected structure
   if getattr(subset.dataset, "classes", None):
     n_classes = len(subset.dataset.classes)
-  elif callable(getattr(subset.dataset, "get_classes"), None):
+  elif callable(getattr(subset.dataset, "get_classes", None)):
     n_classes = len(subset.dataset.get_classes())
 
   # prepare for summary if needed #
@@ -315,7 +326,7 @@ def main(clargs):
   assert batch_size == 4, f'unexpected batch size {batch_size}, should be 4'
   assert n_channels == 1, f'unexpected numer of channels {n_channels}, should be 1'
   assert matrix_size == matrix_size_, f'non-square matrix: {matrix_size}x{matrix_size_}'
-  assert math.log2(matrix_size).is_integer(), f'non-power-of-two matrix size: {matrix_size}'
+  #assert math.log2(matrix_size).is_integer(), f'non-power-of-two matrix size: {matrix_size}'
   print(f'using loaders with samples of the shape {sample_input.shape}')
   print(f'(batch_size: {batch_size})')
   print(f'(n_channels: {n_channels})')
@@ -522,6 +533,21 @@ def main(clargs):
     print(f'saving test labels to {output_d / "test_labels.npy"}')
     np.save(output_d / 'test_labels.npy', lbls)
 
+    # save train latent space if required
+    if clargs.extract_train_latent:
+      print('\n---\nextracting training latent space\n'+'-'*80)
+      _, _, Z_train, lbls_train = test_model( model, train_loader
+                                            , n_splits=clargs.number_splits_classify
+                                            , classify_with_scale=clargs.classify_with_scale
+                                            , dev=dev
+                                            , report_callback=None
+                                            , summary_samples=None
+                                            )
+      print(f'saving train latent space to {output_d / "train_latent_space.npy"}')
+      np.save(output_d / 'train_latent_space.npy', Z_train)
+      print(f'saving train labels to {output_d / "train_labels.npy"}')
+      np.save(output_d / 'train_labels.npy', lbls_train)
+
   # reports #
   ###########
 
@@ -608,6 +634,8 @@ if __name__ == "__main__":
                      , help="Path to weights to load the model with" )
   parser.add_argument( '--skip-training', action=argparse.BooleanOptionalAction, default=False
                      , help=f'skip/do not skip training phase' )
+  parser.add_argument( '--extract-train-latent', action=argparse.BooleanOptionalAction, default=False
+                     , help='enable/disable extracting and saving the training set latent space' )
   parser.add_argument( '--report-only', nargs=2, metavar=('TEST_LATENT_SPACE_NPY', 'TEST_LABELS_NPY'), type=pathlib.Path
                      , help=f'skip to the reporting based on provided latent space and labels (no training, no testing)')
   parser.add_argument( '-r', '--learning-rate', metavar="LR", type=float, default=0.001

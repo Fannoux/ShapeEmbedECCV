@@ -95,7 +95,7 @@ def my_resnet18(*, padding=True, weights = None, progress = True, **kwargs):
 
 # This takes a 128 vector as input and outputs a list of point coordinates and a distance matrix.
 class DecoderMLP(nn.Module):
-  def __init__(self, input_dim=128, hidden_dims=[256, 128, 64], space_dim=2, num_points=32):
+  def __init__(self, input_dim=128, hidden_dims=[256, 128, 64], space_dim=2, num_points=32, act=nn.ReLU):
     super().__init__()
 
     self.space_dim = space_dim
@@ -106,8 +106,16 @@ class DecoderMLP(nn.Module):
     hidden_dims = [(max(d, self.output_dim)*4) for d in hidden_dims]
 
     decode_steps = []
+    # First hidden layer with optional activation
     decode_steps.append(nn.Linear(input_dim, hidden_dims[0]))
-    decode_steps.extend([nn.Linear(in_d, out_d) for in_d, out_d in zip(hidden_dims[:-1], hidden_dims[1:])])
+    if act: decode_steps.append(act())
+
+    # inner hidden layers with optional activation
+    for in_d, out_d in zip(hidden_dims[:-1], hidden_dims[1:]):
+      decode_steps.append(nn.Linear(in_d, out_d))
+      if act: decode_steps.append(act())
+
+    # output layer, no activation
     decode_steps.append(nn.Linear(hidden_dims[-1], self.output_dim))
     self.decoder_layers = nn.Sequential(*decode_steps)
 

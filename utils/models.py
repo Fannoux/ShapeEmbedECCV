@@ -191,6 +191,8 @@ class MyNet(nn.Module):
 
   ########
   def reparameterize(self, mean, log_var):
+    if not self.training:          # inference: return the posterior mean mu (deterministic latent)
+      return mean
     std = torch.exp(0.5 * log_var)
     epsilon = torch.randn_like(std)
     return mean + epsilon * std

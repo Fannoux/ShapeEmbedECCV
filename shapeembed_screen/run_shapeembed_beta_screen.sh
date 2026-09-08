@@ -19,11 +19,11 @@
 #SBATCH -e "se_beta_screen_%A_%a.err"
 set -euo pipefail
 
-BASE="/nfs/research/birney/users/fanny/medaka/ziram_analysis/"
+BASE="/path/to/"
 PYTHON="${PYTHON:-$BASE/scripts_cnn/venv/bin/python}"
 REPO="$BASE/ShapeEmbed/ShapeEmbedLite"
-TRAIN_DM="/nfs/research/birney/users/fanny/medaka/ziram_analysis/ECCV_frozen/DM_TrainVal/train"
-VAL_DM="/nfs/research/birney/users/fanny/medaka/ziram_analysis/ECCV_frozen/DM_TrainVal/test"
+TRAIN_DM="/path/to/ECCV_frozen/DM_TrainVal/train"
+VAL_DM="/path/to/ECCV_frozen/DM_TrainVal/test"
 OUT_BASE="${OUT_BASE:-$BASE/ShapeEmbed/shapeembed_beta_screen_out2}"
 FEATURIZE="$(cd "$(dirname "$0")" && pwd)/shapeembed_to_features.py"
 LR=0.0001; EPOCHS=200

@@ -18,7 +18,7 @@
 #SBATCH -e "runs/logs/shapeembed_screen_%A_%a.err"
 set -euo pipefail
 
-BASE="/nfs/research/birney/users/fanny/medaka/ziram_analysis/ShapeEmbed/"                 # -> .../Ziram
+BASE="/path/to/ShapeEmbed/"                 # -> .../Ziram
 PYTHON="${PYTHON:-$BASE/venv_cnn/bin/python}"
 REPO="$BASE/ShapeEmbedLite"
 DM_DIR="$BASE/BinaryMask2DM_Ziram_TrainVal"

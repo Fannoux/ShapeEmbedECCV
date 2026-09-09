@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
 """
-Convert Ziram F0 binary masks to ShapeEmbed distance matrices — script version of
-prepare_ziram.ipynb, driven by the dataset's predefined split (NO random split here).
+Convert binary masks to ShapeEmbed distance matrices — script version of 
+the repo ConvertBinaryMasksToDMs, driven by a dataset's predefined split (NO random split here).
 
-Pipeline per mask (exactly as the notebook):
+Pipeline per mask (as the notebook):
     mask PNG -> find_longest_contour -> contour_spline_resample(n_samples) -> distance_matrix
 
-Uses the manifest's `set` column directly:
-    set == 'training'   -> OUT/train/<severity>/<stem>.npy
-    set == 'validation' -> OUT/test/<severity>/<stem>.npy   (validation = ShapeEmbed's "test")
-Only training + validation are processed (F2 test set not handled here).
-Sub-folders are the severity_score_adjusted classes (0-4), so it plugs straight into
-    python ShapeEmbedLite.py --train-test-dataset F0 OUT/train OUT/test ...
+Uses a manifest's with a `set` column directly:
+    set == 'training'   -> OUT/train/<label>/<stem>.npy
+    set == 'test'       -> OUT/test/<label>/<stem>.npy
+    set == 'validation' -> OUT/test/<label>/<stem>.npy   (validation = ShapeEmbed's "test")
 
 Usage:
     python prepare_ziram.py \
         --masks /path/to/masks \
         --manifest /path/to/manifest.csv \
-        --out /path/to/output \
+        --out /path/to/output_dm \
         --n-samples 64
 """
 
@@ -32,7 +30,9 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # find helpers.py next to this script
 from helpers import find_longest_contour, contour_spline_resample, distance_matrix
 
+#Choose
 SET2DIR = {'training': 'train', 'validation': 'test'}            # validation -> ShapeEmbed "test"
+SET2DIR = {'training': 'train', 'test': 'test'}
 
 
 def image_to_contour(fname, n_samples=64, sparsity=1):
@@ -46,10 +46,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--masks', default=None)
     ap.add_argument('--manifest', default=None)
-    ap.add_argument('--out', default='./distance_matrices')
+    ap.add_argument('--out', default='./BinaryMask2DM')
     ap.add_argument('--n-samples', type=int, default=64, help='contour points = distance-matrix size (power of 2!)')
     ap.add_argument('--sparsity', type=int, default=1)
-    ap.add_argument('--label-col', default='severity_score_adjusted')
+    ap.add_argument('--label-col', default='label')
     args = ap.parse_args()
 
     assert (args.n_samples & (args.n_samples - 1)) == 0, \
@@ -65,7 +65,7 @@ def main():
     print(meta.head(), files.head())
     merge = meta.merge(files, on='stem', how='inner')
     merge = merge[merge['set'].isin(SET2DIR)]
-    print(f"masks: {len(files)} | manifest: {len(meta)} | matched (training+validation): {len(merge)}")
+    print(f"masks: {len(files)} | manifest: {len(meta)} | matched: {len(merge)}")
     print(merge.groupby(['set', args.label_col]).size().unstack(fill_value=0).to_string())
 
     out = Path(args.out)
@@ -83,13 +83,14 @@ def main():
             failed.append((row['stem'], str(e)))
 
     print(f"\n[OK] wrote {sum(placed.values())} distance matrices ({args.n_samples}x{args.n_samples}) -> {out}")
-    for sub in ('train', 'test'):
-        r = {c: placed.get((sub, c), 0) for c in '01234'}
-        print(f"  {sub:5s}: " + " ".join(f"SC{c}={r[c]}" for c in '01234') + f"  total={sum(r.values())}")
+    #for sub in ('train', 'test'):
+    #    r = {c: placed.get((sub, c), 0) for c in '01234'}
+    #    print(f"  {sub:5s}: " + " ".join(f"label{c}={r[c]}" for c in '01234') + f"  total={sum(r.values())}")
+
     if failed:
         print(f"  failed: {len(failed)} (e.g. {failed[:2]})")
-    print(f"\nNext -> python ShapeEmbedLite.py --train-test-dataset F0 {out}/train {out}/test "
-          f"-l 64 -b 0.0 -e 150 --batch-size 16 -n 5 --classify-with-scale -p 0.1 10 -o results/F0_ls128_b0")
+    print(f"\nNext -> python ShapeEmbedLite.py --train-test-dataset $name {out}/train {out}/test "
+          f"-l 64 -b 0.0 -e 150 --batch-size 16 -n 5 --classify-with-scale -p 0.1 10 -o results/")
 
 
 if __name__ == '__main__':

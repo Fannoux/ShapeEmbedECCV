@@ -6,7 +6,7 @@
 set -euo pipefail
 
 OUT="${1:?usage: collect_reconstructions.sh <run_out_dir>}"
-DEST="$OUT/to_send_Anna"
+DEST="$OUT/output"
 mkdir -p "$DEST"
 
 # 1) the multi-sample summary (original vs reconstructed distance matrices/contours)
@@ -23,5 +23,3 @@ if [ "$n" -gt 0 ]; then
 fi
 
 echo "[OK] $(ls "$DEST" 2>/dev/null | wc -l) files -> $DEST"
-echo "     Send: summary_report.pdf (+ mean_shapes.pdf) and the *_report.pdf originals-vs-reconstructions."
-echo "     Framing: 'here are the reconstructions you asked for — the outlines look [limited/fine] on our curved shapes; any thoughts on the decoder?'"

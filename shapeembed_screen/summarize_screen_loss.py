@@ -5,7 +5,7 @@ import pandas as pd
 if sys.argv[1]:
     BASE = sys.argv[1]
 else:
-    BASE = os.environ.get('OUT_BASE', 'shapeembed_beta_screen_out2')
+    BASE = os.environ.get('OUT_BASE', 'shapeembed_beta_screen_out')
 print('config\tlatent\tnorm\tbeta\trecon\tkl\ttotal_val\tclassification')
 cols = ['config', 'latent', 'norm', 'beta', 'reconstruction', 'KL', 'total_val']
 res_summary = pd.DataFrame(columns=cols)

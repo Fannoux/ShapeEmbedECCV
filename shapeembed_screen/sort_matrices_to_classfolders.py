@@ -8,7 +8,7 @@ Produces:
     OUT/test/<class>/*.npy    (manifest set == 'validation'  -> ShapeEmbed's "test")
 
 Then run:
-    python ShapeEmbedLite.py --train-test-dataset F0 OUT/train OUT/test ...
+    python ShapeEmbedLite.py --train-test-dataset name OUT/train OUT/test ...
 
 Matching: each .npy is matched to a manifest row by its filename stem (the full image
 name). A trailing suffix like '_dm' / '_preprocessed_dm' is tolerated; a unique
@@ -16,7 +16,7 @@ substring match is used as a fallback. Unmatched (unlabelled) matrices are skipp
 
 Usage:
     python sort_matrices_to_classfolders.py --matrices distmat_raw \
-        --manifest shapeembed_F0_manifest.csv --out distmat_F0 [--copy]
+        --manifest shapeembed_manifest.csv --out distmat [--copy]
 """
 
 import argparse
@@ -49,7 +49,7 @@ def main():
     args = ap.parse_args()
 
     man = pd.read_csv(args.manifest)
-    info = {r['stem']: (str(SET2DIR[r['set']]), str(int(r['severity_score_adjusted'])))
+    info = {r['stem']: (str(SET2DIR[r['set']]), str(int(r['label'])))
             for _, r in man.iterrows()}
     stems = set(info)
 
@@ -69,12 +69,12 @@ def main():
         placed[(sub, cls)] = placed.get((sub, cls), 0) + 1
 
     print(f"matrices found: {len(npys)} | placed: {sum(placed.values())} | unmatched(skipped): {len(skipped)}")
-    for sub in ('train', 'test'):
-        row = {c: placed.get((sub, c), 0) for c in '01234'}
-        print(f"  {sub:5s}: " + " ".join(f"SC{c}={row[c]}" for c in '01234') + f"  total={sum(row.values())}")
+#    for sub in ('train', 'test'):
+#        row = {c: placed.get((sub, c), 0) for c in '01234'}
+#        print(f"  {sub:5s}: " + " ".join(f"SC{c}={row[c]}" for c in '01234') + f"  total={sum(row.values())}")
     if skipped:
         print(f"  e.g. unmatched: {skipped[:3]}")
-    print(f"\nReady -> python ShapeEmbedLite.py --train-test-dataset F0 {args.out}/train {args.out}/test ...")
+    print(f"\nReady -> python ShapeEmbedLite.py --train-test-dataset name {args.out}/train {args.out}/test ...")
 
 
 if __name__ == '__main__':

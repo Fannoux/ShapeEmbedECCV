@@ -1,25 +1,24 @@
 #!/bin/bash
-# Determinism check (settles point #1): extract the SAME set's latents twice from ONE trained
-# checkpoint and diff them.  identical -> reproducible (Anna's "seeded" claim holds);
-# different -> the exported embedding is a random draw (sampled z), i.e. not reproducible.
-#
-# Usage:  bash check_determinism.sh <path/to/Ziram_model_state_dict.pth> [LATENT_-l]
+# Determinism check
+
+# Usage:  bash check_determinism.sh <path/to/model_state_dict.pth> [LATENT_-l]
 #   LATENT_-l must match the -l used to TRAIN that checkpoint (default 128).
 set -euo pipefail
 
-MODEL="${1:?usage: check_determinism.sh <Ziram_model_state_dict.pth> [latent_-l, default 128]}"
+MODEL="${1:?usage: check_determinism.sh <model_state_dict.pth> [latent_-l, default 128]}"
 L="${2:-128}"
 BASE="$(cd "$(dirname "$0")/.." && pwd)"
-PYTHON="${PYTHON:-$BASE/scripts_cnn/venv/bin/python}"
+PYTHON="${PYTHON:-$BASE/venv/bin/python}"
 REPO="$BASE/ShapeEmbedLite"
-VAL_DM="$BASE/mask_data/BinaryMask2DM_Ziram_TrainVal/test"
-OUT="$BASE/mask_data/shapeembed_screen_out/determinism_check"
+VAL_DM="$BASE/DM_folder/test"
+OUT="$BASE/output/determinism_check"
 CFG="--preprocess-normalize fro -l $L -b 1e-8 --classify-with-scale"
+NAME="experiment_name"
 
 for r in a b; do
   echo "=== extraction pass $r ==="
   "$PYTHON" "$REPO/ShapeEmbedLite.py" --skip-training -w "$MODEL" \
-      --train-test-dataset Ziram "$VAL_DM" "$VAL_DM" $CFG -n 5 -o "$OUT/run_$r"
+      --train-test-dataset "$NAME" "$VAL_DM" "$VAL_DM" $CFG -n 5 -o "$OUT/run_$r"
 done
 
 "$PYTHON" - "$OUT/run_a/test_latent_space.npy" "$OUT/run_b/test_latent_space.npy" <<'PY'

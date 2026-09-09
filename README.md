@@ -116,3 +116,21 @@ The results of the run are gathered under a
 > ```
 
 <br />
+
+---
+
+## This fork: medaka phenotyping benchmark
+
+This fork adds a screening and feature-export pipeline used to benchmark ShapeEmbed against other
+representations (see the [team repository](https://github.com/birneylab/benchmarking-phenotyping-medaka-ziram)).
+The upstream model and its usage (above) are unchanged; the added code lives in
+[`shapeembed_screen/`](shapeembed_screen/):
+
+- **Data prep** — `prepare_ziram.py`, `sort_matrices_to_classfolders.py`, `helpers.py`: turn binary
+  masks into the class-foldered distance-matrix dataset ShapeEmbedLite expects.
+- **Screen** — `run_shapeembed_screen.sh`, `run_shapeembed_beta_screen.sh`: train and evaluate across
+  a latent-size / normalisation / beta grid (SLURM array or sequential).
+- **Feature export** — `shapeembed_to_features.py`: write the deterministic latents to the shared
+  `data_id, f0..fN, label` table consumed by the evaluation repo.
+- **Helpers** — `check_determinism.sh`, `collect_reconstructions.sh`, `summarize_screen_loss.py`.
+

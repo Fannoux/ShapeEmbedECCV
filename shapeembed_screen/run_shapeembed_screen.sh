@@ -18,11 +18,11 @@
 #SBATCH -e "runs/logs/shapeembed_screen_%A_%a.err"
 set -euo pipefail
 
-BASE="/path/to/ShapeEmbed/"                 
+BASE="/path/to/base/"
 PYTHON="${PYTHON:-$BASE/venv/bin/python}"
 REPO="$BASE/ShapeEmbedLite"
 DM_DIR="$BASE/DM_folder"
-TRAIN_DM="$DM_DIR/train"                                 
+TRAIN_DM="$DM_DIR/train"
 VAL_DM="$DM_DIR/test"                                    # ShapeEmbed "test" = our validation
 OUT_BASE="$BASE/output/"
 FEATURIZE="$(cd "$(dirname "$0")" && pwd)/shapeembed_to_features.py"

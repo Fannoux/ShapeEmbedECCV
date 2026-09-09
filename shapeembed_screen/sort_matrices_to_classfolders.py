@@ -5,10 +5,10 @@ ShapeEmbedLite's DatasetFolder expects, using the fixed adjusted split.
 
 Produces:
     OUT/train/<class>/*.npy   (manifest set == 'training')
-    OUT/test/<class>/*.npy    (manifest set == 'validation'  -> ShapeEmbed's "test")
+    OUT/test/<class>/*.npy    (if manifest set == 'validation'  -> ShapeEmbed's "test")
 
 Then run:
-    python ShapeEmbedLite.py --train-test-dataset name OUT/train OUT/test ...
+    python ShapeEmbedLite.py --train-test-dataset <name> OUT/train OUT/test ...
 
 Matching: each .npy is matched to a manifest row by its filename stem (the full image
 name). A trailing suffix like '_dm' / '_preprocessed_dm' is tolerated; a unique
@@ -26,7 +26,7 @@ import shutil
 import pandas as pd
 
 SET2DIR = {'training': 'train', 'validation': 'test'}
-
+#OR SET2DIR = {'training': 'train', 'test': 'test'}
 
 def resolve_stem(npy_name, stems):
     base = os.path.basename(npy_name)
@@ -74,7 +74,7 @@ def main():
 #        print(f"  {sub:5s}: " + " ".join(f"SC{c}={row[c]}" for c in '01234') + f"  total={sum(row.values())}")
     if skipped:
         print(f"  e.g. unmatched: {skipped[:3]}")
-    print(f"\nReady -> python ShapeEmbedLite.py --train-test-dataset name {args.out}/train {args.out}/test ...")
+    print(f"\nReady -> python ShapeEmbedLite.py --train-test-dataset <name> {args.out}/train {args.out}/test ...")
 
 
 if __name__ == '__main__':

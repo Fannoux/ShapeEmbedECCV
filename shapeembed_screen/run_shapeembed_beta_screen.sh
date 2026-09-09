@@ -15,12 +15,12 @@
 #SBATCH -e "se_beta_screen_%A_%a.err"
 set -euo pipefail
 
-BASE="/path/to/"
+BASE="/path/to/base"
 PYTHON="${PYTHON:-$BASE/venv/bin/python}"
-REPO="$BASE/ShapeEmbed/ShapeEmbedLite"
+REPO="$BASE/ShapeEmbedLite"
 TRAIN_DM="/path/to/DM_folder/train"
 VAL_DM="/path/to/DM_folder/test"
-OUT_BASE="${OUT_BASE:-$BASE/ShapeEmbed/shapeembed_beta_screen_out}"
+OUT_BASE="$BASE/output"
 FEATURIZE="$(cd "$(dirname "$0")" && pwd)/shapeembed_to_features.py"
 NAME="experiment_name"
 LR=0.0001; EPOCHS=200

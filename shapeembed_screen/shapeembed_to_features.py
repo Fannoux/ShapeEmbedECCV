@@ -42,14 +42,14 @@ def main():
             raise SystemExit(f"[ERR] {len(stems)} stems in {a.dm_dir} != {n} latents (order mismatch)")
         if not np.array_equal(np.asarray(flabels), y):
             raise SystemExit("[ERR] folder-order labels != saved labels -> id mapping NOT safe")
-        fish_id = stems
+        data_id = stems
         src = 'folder'
     else:
-        fish_id = [f'train_{i}' for i in range(n)]     # placeholder (fit-only set)
+        data_id = [f'train_{i}' for i in range(n)]     # placeholder (fit-only set)
         src = 'placeholder'
 
     df = pd.DataFrame(X, columns=[f'f{i}' for i in range(X.shape[1])])
-    df.insert(0, 'fish_id', fish_id)
+    df.insert(0, 'data_id', data_id)
     df['label'] = y
     os.makedirs(os.path.dirname(a.out) or '.', exist_ok=True)
     df.to_csv(a.out, index=False)

@@ -32,7 +32,8 @@ from helpers import find_longest_contour, contour_spline_resample, distance_matr
 
 #Choose
 SET2DIR = {'training': 'train', 'validation': 'test'}            # validation -> ShapeEmbed "test"
-SET2DIR = {'training': 'train', 'test': 'test'}
+print('Using the following mapping, change if using test set ', SET2DIR)
+#SET2DIR = {'training': 'train', 'test': 'test'}
 
 
 def image_to_contour(fname, n_samples=64, sparsity=1):
@@ -89,7 +90,7 @@ def main():
 
     if failed:
         print(f"  failed: {len(failed)} (e.g. {failed[:2]})")
-    print(f"\nNext -> python ShapeEmbedLite.py --train-test-dataset $name {out}/train {out}/test "
+    print(f"\nNext -> python ShapeEmbedLite.py --train-test-dataset <name> {out}/train {out}/test "
           f"-l 64 -b 0.0 -e 150 --batch-size 16 -n 5 --classify-with-scale -p 0.1 10 -o results/")
 
 

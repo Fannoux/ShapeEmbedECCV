@@ -1,5 +1,5 @@
 #!/bin/bash
-# Gather the reconstruction artifacts to send Anna (she asked for these): the summary comparison
+# Gather the reconstruction artifacts from a run: the summary comparison
 # and a spread of per-sample original-vs-reconstructed outline plots.
 #
 # Usage:  bash collect_reconstructions.sh <run_out_dir>   (e.g. .../shapeembed_screen_out/ls128_...)
